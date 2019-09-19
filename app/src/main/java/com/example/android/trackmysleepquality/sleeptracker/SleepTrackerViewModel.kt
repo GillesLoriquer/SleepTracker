@@ -18,7 +18,12 @@ package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
+import com.example.android.trackmysleepquality.database.SleepNight
+import com.example.android.trackmysleepquality.formatNights
+import kotlinx.coroutines.*
 
 /**
  * ViewModel for SleepTrackerFragment.
@@ -27,5 +32,93 @@ import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 // and makes it available as a property
 class SleepTrackerViewModel(
         val database: SleepDatabaseDao,
-        application: Application) : AndroidViewModel(application)
+        application: Application) : AndroidViewModel(application) {
+
+    private var viewModelJob = Job()
+
+    private var uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+
+    private val allNights = database.getAllNights()
+
+    val allNightsString = Transformations.map(allNights) {
+        formatNights(it, application.resources)
+    }
+
+    private var tonight = MutableLiveData<SleepNight?>()
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+    init {
+        initializeTonight()
+    }
+
+    // Coroutine launched in the UI Scope
+    private fun initializeTonight() {
+        uiScope.launch {
+            tonight.value = getTonightFromDatabase()
+        }
+    }
+
+    // Coroutine lauched in Dispatchers.IO context
+    private suspend fun getTonightFromDatabase(): SleepNight? {
+        return withContext(Dispatchers.IO) {
+            var night = database.getTonight()
+
+            if (night?.endTimeMilli != night?.startTimeMilli) {
+                night = null
+            }
+            night
+        }
+    }
+
+    // Coroutine launched in the UI Scope
+    fun onStartTracking() {
+        uiScope.launch {
+            val newNight = SleepNight()
+            insert(newNight)
+            tonight.value = getTonightFromDatabase()
+        }
+    }
+
+    // Coroutine lauched in Dispatchers.IO context
+    private suspend fun insert(night: SleepNight) {
+        return withContext(Dispatchers.IO) {
+            database.insert(night)
+        }
+    }
+
+    // Coroutine launched in the UI Scope
+    fun onStopTracking() {
+        uiScope.launch {
+            val oldNight = tonight.value ?: return@launch
+            oldNight.endTimeMilli = System.currentTimeMillis()
+            update(oldNight)
+        }
+    }
+
+    // Coroutine lauched in Dispatchers.IO context
+    private suspend fun update(night: SleepNight) {
+        return withContext(Dispatchers.IO) {
+            database.update(night)
+        }
+    }
+
+    // Coroutine launched in the UI Scope
+    fun onClear() {
+        uiScope.launch {
+            clear()
+            tonight.value = null
+        }
+    }
+
+    // Coroutine lauched in Dispatchers.IO context
+    suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            database.clear()
+        }
+    }
+}
 
