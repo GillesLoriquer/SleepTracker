@@ -40,7 +40,7 @@ class SleepTrackerViewModel(
 
     private val _allNights = database.getAllNights()
     val allNights: LiveData<List<SleepNight>>
-            get() = _allNights
+        get() = _allNights
 
     private var tonight = MutableLiveData<SleepNight?>()
 
@@ -64,6 +64,10 @@ class SleepTrackerViewModel(
     val showSnackBarEvent: LiveData<Boolean>
         get() = _showSnackbarEvent
 
+    private val _navigateToSleepDetail = MutableLiveData<Long>()
+    val navigateToSleepDetail: LiveData<Long>
+        get() = _navigateToSleepDetail
+
     override fun onCleared() {
         super.onCleared()
         viewModelJob.cancel()
@@ -71,6 +75,14 @@ class SleepTrackerViewModel(
 
     init {
         initializeTonight()
+    }
+
+    fun onSleepNightClicker(id: Long) {
+        _navigateToSleepDetail.value = id
+    }
+
+    fun onSleepDetailNavigated() {
+        _navigateToSleepDetail.value = null
     }
 
     // Coroutine launched in the UI Scope

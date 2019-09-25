@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -73,7 +72,7 @@ class SleepTrackerFragment : Fragment() {
 
         // RECYCLERVIEW + ADAPTER
         val adapter = SleepNightAdapter(SleepNightAdapter.SleepNightListener {
-            Toast.makeText(activity, "$it", Toast.LENGTH_SHORT).show()
+            sleepTrackerViewModel.onSleepNightClicker(it)
         })
         val recyclerView: RecyclerView = binding.recyclerViewSleeps
         recyclerView.apply {
@@ -105,6 +104,15 @@ class SleepTrackerFragment : Fragment() {
                         Snackbar.LENGTH_SHORT // How long to display the message.
                 ).show()
                 sleepTrackerViewModel.doneShowingSnackbar()
+            }
+        })
+
+        sleepTrackerViewModel.navigateToSleepDetail.observe(this, Observer { nightId ->
+            nightId?.let {
+                this.findNavController().navigate(
+                        SleepTrackerFragmentDirections
+                                .actionSleepTrackerFragmentToSleepDetailFragment(nightId))
+                sleepTrackerViewModel.onSleepDetailNavigated()
             }
         })
 
