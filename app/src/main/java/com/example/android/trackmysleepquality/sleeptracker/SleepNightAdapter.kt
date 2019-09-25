@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.database.SleepNight
 import com.example.android.trackmysleepquality.databinding.NightRowBinding
 
-class SleepNightAdapter :
+class SleepNightAdapter(private val clickListener: SleepNightListener) :
         ListAdapter<SleepNight, SleepNightAdapter.SleepNightViewHolder>(DIFF_CALLBACK) {
 
     companion object {
@@ -33,10 +33,10 @@ class SleepNightAdapter :
     }
 
     override fun onBindViewHolder(holderSleep: SleepNightViewHolder, position: Int) {
-        holderSleep.bind(getItem(position))
+        holderSleep.bind(getItem(position), clickListener)
     }
 
-    class SleepNightViewHolder private constructor(val binding: NightRowBinding) : RecyclerView.ViewHolder(binding.root) {
+    class SleepNightViewHolder private constructor(private val binding: NightRowBinding) : RecyclerView.ViewHolder(binding.root) {
 
         companion object {
             fun from(parent: ViewGroup): SleepNightViewHolder {
@@ -46,13 +46,18 @@ class SleepNightAdapter :
             }
         }
 
-        fun bind(sleepNight: SleepNight) {
+        fun bind(sleepNight: SleepNight, clickListener: SleepNightListener) {
             binding.sleepNight = sleepNight
-
+            binding.clickListener = clickListener
             // This call is an optimization that asks data binding to execute any pending bindings
             // right away. It's always a good idea to call executePendingBindings() when you use
             // binding adapters in a RecyclerView, because it can slightly speed up sizing the views.
             binding.executePendingBindings()
+
         }
+    }
+
+    class SleepNightListener(val clickListener: (sleepNightId: Long) -> Unit) {
+        fun onClick(sleepNight: SleepNight) = clickListener(sleepNight.nightId)
     }
 }
