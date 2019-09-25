@@ -23,7 +23,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
 import com.example.android.trackmysleepquality.database.SleepNight
-import com.example.android.trackmysleepquality.formatNights
 import kotlinx.coroutines.*
 
 /**
@@ -39,11 +38,9 @@ class SleepTrackerViewModel(
 
     private var uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    private val allNights = database.getAllNights()
-
-    val allNightsString = Transformations.map(allNights) {
-        formatNights(it, application.resources)
-    }
+    private val _allNights = database.getAllNights()
+    val allNights: LiveData<List<SleepNight>>
+            get() = _allNights
 
     private var tonight = MutableLiveData<SleepNight?>()
 
@@ -59,7 +56,7 @@ class SleepTrackerViewModel(
         it != null
     }
 
-    val clearButtonVisible: LiveData<Boolean> = Transformations.map(allNights) {
+    val clearButtonVisible: LiveData<Boolean> = Transformations.map(_allNights) {
         it?.isNotEmpty()
     }
 
