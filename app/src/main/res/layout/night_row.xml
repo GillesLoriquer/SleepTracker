@@ -27,35 +27,22 @@
                 android:layout_width="@dimen/icon_size"
                 android:layout_height="@dimen/icon_size"
                 android:layout_marginStart="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/text_view_sleep_quality"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:sleepQualityImage="@{sleepNight}"
                 app:srcCompat="@drawable/ic_sleep_5" />
 
             <TextView
-                android:id="@+id/text_view_sleep_length"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                app:layout_constraintStart_toEndOf="@id/image_view_sleep_quality"
-                app:layout_constraintTop_toTopOf="@id/image_view_sleep_quality"
-                app:sleepLengthFormatted="@{sleepNight}"
-                tools:text="8 hours on Friday" />
-
-            <TextView
                 android:id="@+id/text_view_sleep_quality"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                app:layout_constraintBottom_toBottomOf="@id/image_view_sleep_quality"
-                app:layout_constraintStart_toStartOf="@id/text_view_sleep_length"
-                app:layout_constraintTop_toBottomOf="@id/text_view_sleep_length"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/image_view_sleep_quality"
+                app:layout_constraintStart_toStartOf="@id/image_view_sleep_quality"
+                app:layout_constraintTop_toBottomOf="@id/image_view_sleep_quality"
                 app:sleepQualityString="@{sleepNight}"
                 tools:text="Excellent !" />
 
