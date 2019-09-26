@@ -10,12 +10,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.android.trackmysleepquality.R
 import com.example.android.trackmysleepquality.database.SleepNight
 import com.example.android.trackmysleepquality.databinding.NightRowBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val ITEM_VIEW_TYPE_HEADER = 0
 private const val ITEM_VIEW_TYPE_ITEM = 1
 
 class SleepNightAdapter(private val clickListener: SleepNightListener) :
         ListAdapter<SleepNightAdapter.DataItem, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
+
+    private val adapterScope = CoroutineScope(Dispatchers.Default)
 
     companion object {
         // DIFF_CALLBACK est définie static car elle est utilisée pour appeler le constructeur parent
@@ -44,11 +50,15 @@ class SleepNightAdapter(private val clickListener: SleepNightListener) :
     }
 
     fun addHeaderAndSubmitList(list: List<SleepNight>?) {
-        val items = when (list) {
-            null -> listOf(DataItem.Header)
-            else -> listOf(DataItem.Header) + list.map { DataItem.SleepNightItem(it) }
+        adapterScope.launch {
+            val items = when (list) {
+                null -> listOf(DataItem.Header)
+                else -> listOf(DataItem.Header) + list.map { DataItem.SleepNightItem(it) }
+            }
+            withContext(Dispatchers.Main) {
+                submitList(items)
+            }
         }
-        submitList(items)
     }
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {

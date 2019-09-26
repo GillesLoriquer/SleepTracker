@@ -77,6 +77,13 @@ class SleepTrackerFragment : Fragment() {
         val recyclerView: RecyclerView = binding.recyclerViewSleeps
         recyclerView.apply {
             layoutManager = GridLayoutManager(activity, 3)
+            //You need to make an object because setSpanSizeLookup doesn't take a lambda
+            (layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int = when (position) {
+                    0 -> 3
+                    else -> 1
+                }
+            }
             setHasFixedSize(true)
             setAdapter(adapter)
         }
